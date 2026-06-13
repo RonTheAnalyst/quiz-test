@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kids Subtraction Quiz - Audio Test</title>
+    <title>Kids Subtraction Quiz - Piano Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
@@ -122,7 +122,6 @@
             font-weight: bold;
             color: #4CAF50;
         }
-        /* Style for the tiny music button at the bottom */
         #music-toggle {
             margin-top: 20px;
             background-color: #2196F3;
@@ -158,13 +157,13 @@
         <p style="font-size: 24px;">Score: <strong id="final-score"></strong> / 10</p>
         <p style="font-size: 20px;">Time: <strong id="final-time"></strong></p>
         
-        <div id="status-message">✅ Audio Test Complete! (Email Disabled)</div>
+        <div id="status-message">✅ Piano Test Complete! (Email Disabled)</div>
         <br>
         <button id="retry-btn" style="background-color: var(--secondary);" onclick="location.reload()">Play Again 🔄</button>
     </div>
 </div>
 
-<button id="music-toggle" class="hidden" onclick="toggleMusic()">🔊 Music: ON</button>
+<button id="music-toggle" class="hidden" onclick="toggleMusic()">🎹 Music: ON</button>
 
 <script>
     let currentQuestion = 0;
@@ -176,14 +175,17 @@
     let kidName = "";
     
     // ======================================================================
-    // 🎵 THE BUILT-IN AUDIO ENGINE 🎵
+    // 🎹 THE BUILT-IN PIANO ENGINE 🎹
     // ======================================================================
     let audioCtx;
     let bgMusicInterval;
     let isMusicPlaying = true;
 
-    // The Pentatonic Scale (very soothing, sounds like wind chimes)
-    const pentatonicNotes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
+    // A fun, bouncy C-Major Pentatonic scale spanning 2 octaves
+    const pianoNotes = [
+        261.63, 293.66, 329.63, 392.00, 440.00, // Lower octave
+        523.25, 587.33, 659.25, 783.99, 880.00  // Higher octave
+    ];
 
     function initAudio() {
         if (!audioCtx) {
@@ -194,41 +196,62 @@
         }
     }
 
-    // Function to generate the random background chimes
+    // Mathematical Piano Synthesizer!
+    function playPianoKey(freq, volume = 0.15) {
+        if (!audioCtx) return;
+        const t = audioCtx.currentTime;
+
+        // Triangle wave gives the "hammer strike" sound
+        const osc1 = audioCtx.createOscillator();
+        osc1.type = 'triangle';
+        osc1.frequency.value = freq;
+
+        // Sine wave gives the lingering "string vibration" sound
+        const osc2 = audioCtx.createOscillator();
+        osc2.type = 'sine';
+        osc2.frequency.value = freq;
+
+        const gainNode = audioCtx.createGain();
+
+        // Piano Envelope (Sharp attack, exponential decay)
+        gainNode.gain.setValueAtTime(0, t);
+        gainNode.gain.linearRampToValueAtTime(volume, t + 0.02); // Fast attack!
+        gainNode.gain.exponentialRampToValueAtTime(0.001, t + 1.5); // Fade out string
+
+        osc1.connect(gainNode);
+        osc2.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        osc1.start(t);
+        osc2.start(t);
+        osc1.stop(t + 1.6);
+        osc2.stop(t + 1.6);
+    }
+
     function startBgMusic() {
         if (bgMusicInterval) clearInterval(bgMusicInterval);
         
         bgMusicInterval = setInterval(() => {
             if (!isMusicPlaying || !audioCtx) return;
 
-            const freq = pentatonicNotes[Math.floor(Math.random() * pentatonicNotes.length)];
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            // Pick a random note from the bouncy scale
+            const freq = pianoNotes[Math.floor(Math.random() * pianoNotes.length)];
             
-            osc.type = 'sine'; // Sine waves are the softest sounding
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.frequency.value = freq;
+            // Play it very softly in the background
+            playPianoKey(freq, 0.05);
 
-            // Fade in gently, fade out slowly
-            gain.gain.setValueAtTime(0, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.03, audioCtx.currentTime + 1); // Very quiet!
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 4);
-
-            osc.start(audioCtx.currentTime);
-            osc.stop(audioCtx.currentTime + 4);
-        }, 1200); // Plays a new soft note every 1.2 seconds
+        }, 800); // Plays a little faster to feel like a playful melody
     }
 
     function toggleMusic() {
         isMusicPlaying = !isMusicPlaying;
         const btn = document.getElementById('music-toggle');
         if (isMusicPlaying) {
-            btn.innerText = "🔊 Music: ON";
+            btn.innerText = "🎹 Music: ON";
             btn.style.backgroundColor = "#2196F3";
         } else {
             btn.innerText = "🔇 Music: OFF";
-            btn.style.backgroundColor = "#9e9e9e"; // Grey out when off
+            btn.style.backgroundColor = "#9e9e9e"; 
         }
     }
 
@@ -257,22 +280,11 @@
             oscillator.stop(audioCtx.currentTime + 0.3);
             
         } else if (type === 'cheer') {
-            const notes = [440, 554.37, 659.25, 880]; 
-            notes.forEach((freq, i) => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'square';
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.frequency.value = freq;
-
-                const startTime = audioCtx.currentTime + (i * 0.15);
-                gain.gain.setValueAtTime(0.05, startTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
-
-                osc.start(startTime);
-                osc.stop(startTime + 0.4);
-            });
+            // Victory Piano Chord!
+            playPianoKey(523.25, 0.2); // C
+            playPianoKey(659.25, 0.2); // E
+            playPianoKey(783.99, 0.2); // G
+            playPianoKey(1046.50, 0.2); // High C
         }
     }
     // ======================================================================
@@ -285,13 +297,10 @@
             return;
         }
         
-        // Wake up audio engine and start the soothing bg music
         initAudio();
         startBgMusic();
         
-        // Show the music toggle button
         document.getElementById('music-toggle').classList.remove('hidden');
-
         document.getElementById('setup-screen').classList.add('hidden');
         document.getElementById('quiz-screen').classList.remove('hidden');
         
@@ -379,7 +388,6 @@
     function endQuiz() {
         clearInterval(timerInterval);
         
-        // Stop background music at the end so it doesn't clash with the victory chime
         isMusicPlaying = false; 
         document.getElementById('music-toggle').classList.add('hidden');
         
@@ -394,7 +402,7 @@
         document.getElementById('final-score').innerText = score;
         document.getElementById('final-time').innerText = finalTimeStr;
 
-        playSound('cheer'); 
+        playSound('cheer'); // This now plays a big piano chord!
         triggerConfetti();
     }
 
