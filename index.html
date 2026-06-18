@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kids Subtraction Quiz - Piano Edition</title>
+    <title>Math Time! - Subtraction Quiz</title>
+    <!-- Confetti Library -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
@@ -118,9 +119,9 @@
         }
         #status-message {
             margin-top: 15px;
-            font-size: 16px;
+            font-size: 22px;
             font-weight: bold;
-            color: #4CAF50;
+            color: #FF9800;
         }
         #music-toggle {
             margin-top: 20px;
@@ -157,7 +158,7 @@
         <p style="font-size: 24px;">Score: <strong id="final-score"></strong> / 10</p>
         <p style="font-size: 20px;">Time: <strong id="final-time"></strong></p>
         
-        <div id="status-message">✅ Piano Test Complete! (Email Disabled)</div>
+        <div id="status-message">🌟 Keep practicing your math skills! 🌟</div>
         <br>
         <button id="retry-btn" style="background-color: var(--secondary);" onclick="location.reload()">Play Again 🔄</button>
     </div>
@@ -181,10 +182,9 @@
     let bgMusicInterval;
     let isMusicPlaying = true;
 
-    // A fun, bouncy C-Major Pentatonic scale spanning 2 octaves
     const pianoNotes = [
-        261.63, 293.66, 329.63, 392.00, 440.00, // Lower octave
-        523.25, 587.33, 659.25, 783.99, 880.00  // Higher octave
+        261.63, 293.66, 329.63, 392.00, 440.00, 
+        523.25, 587.33, 659.25, 783.99, 880.00  
     ];
 
     function initAudio() {
@@ -196,27 +196,23 @@
         }
     }
 
-    // Mathematical Piano Synthesizer!
     function playPianoKey(freq, volume = 0.15) {
         if (!audioCtx) return;
         const t = audioCtx.currentTime;
 
-        // Triangle wave gives the "hammer strike" sound
         const osc1 = audioCtx.createOscillator();
         osc1.type = 'triangle';
         osc1.frequency.value = freq;
 
-        // Sine wave gives the lingering "string vibration" sound
         const osc2 = audioCtx.createOscillator();
         osc2.type = 'sine';
         osc2.frequency.value = freq;
 
         const gainNode = audioCtx.createGain();
 
-        // Piano Envelope (Sharp attack, exponential decay)
         gainNode.gain.setValueAtTime(0, t);
-        gainNode.gain.linearRampToValueAtTime(volume, t + 0.02); // Fast attack!
-        gainNode.gain.exponentialRampToValueAtTime(0.001, t + 1.5); // Fade out string
+        gainNode.gain.linearRampToValueAtTime(volume, t + 0.02); 
+        gainNode.gain.exponentialRampToValueAtTime(0.001, t + 1.5); 
 
         osc1.connect(gainNode);
         osc2.connect(gainNode);
@@ -233,14 +229,9 @@
         
         bgMusicInterval = setInterval(() => {
             if (!isMusicPlaying || !audioCtx) return;
-
-            // Pick a random note from the bouncy scale
             const freq = pianoNotes[Math.floor(Math.random() * pianoNotes.length)];
-            
-            // Play it very softly in the background
             playPianoKey(freq, 0.05);
-
-        }, 800); // Plays a little faster to feel like a playful melody
+        }, 800); 
     }
 
     function toggleMusic() {
@@ -280,13 +271,13 @@
             oscillator.stop(audioCtx.currentTime + 0.3);
             
         } else if (type === 'cheer') {
-            // Victory Piano Chord!
-            playPianoKey(523.25, 0.2); // C
-            playPianoKey(659.25, 0.2); // E
-            playPianoKey(783.99, 0.2); // G
-            playPianoKey(1046.50, 0.2); // High C
+            playPianoKey(523.25, 0.2); 
+            playPianoKey(659.25, 0.2); 
+            playPianoKey(783.99, 0.2); 
+            playPianoKey(1046.50, 0.2); 
         }
     }
+
     // ======================================================================
 
     function startQuiz() {
@@ -402,7 +393,7 @@
         document.getElementById('final-score').innerText = score;
         document.getElementById('final-time').innerText = finalTimeStr;
 
-        playSound('cheer'); // This now plays a big piano chord!
+        playSound('cheer'); 
         triggerConfetti();
     }
 
